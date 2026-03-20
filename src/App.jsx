@@ -87,10 +87,10 @@ export default function App() {
     return (
       <div className="min-h-screen flex items-center justify-center p-4 auth-bg font-inter">
         <div className="glass-panel p-8 w-full max-w-sm text-center shadow-xl shadow-blue-500/10">
-          <div className="mx-auto w-20 h-20 bg-gradient-to-br from-blue-600 to-purple-600 text-white rounded-[2rem] flex items-center justify-center mb-6 shadow-lg shadow-blue-500/30 transform -rotate-6 hover:rotate-0 transition-transform">
-            <Truck size={40} className="transform rotate-6" />
+          <div className="mx-auto flex items-center justify-center mb-6">
+            <img src="/Logo.png" alt="Zynety Logistics Logo" className="w-32 h-auto drop-shadow-lg" onError={(e) => { e.target.style.display = 'none'; }} />
           </div>
-          <h1 className="text-4xl font-extrabold text-slate-800 mb-2 font-outfit tracking-tight">Zynety</h1>
+          <h1 className="text-3xl font-extrabold text-slate-800 mb-2 font-outfit tracking-tight">Zynety Logistics</h1>
           <p className="text-sm font-medium text-slate-500 mb-10">India's Unified Logistics Platform</p>
           
           <div className="flex flex-col gap-4 text-left">
@@ -130,7 +130,8 @@ export default function App() {
             </div>
           </div>
           
-          <p className="text-xs text-slate-400 mt-6 font-medium">By continuing, you agree to our Terms of Service & Privacy Policy.</p>
+          
+          <p className="text-xs text-slate-400 mt-6 font-medium">By continuing, you agree to our Terms of Service & Privacy Policy.<br/><br/>Authorization:<br/><span className="font-bold text-slate-500">Zynety Logistics Private Limited</span></p>
         </div>
       </div>
     );
@@ -140,14 +141,11 @@ export default function App() {
     <Router>
       <div className="h-screen flex flex-col bg-[#F8FAFC] overflow-hidden text-slate-800 font-inter">
         
-        {/* Top App Bar inside main flow */}
         {role === 'customer' && (
-           <header className="h-14 flex items-center justify-between px-4 bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-40 shrink-0">
-             <div className="flex items-center gap-2">
-               <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white bg-gradient-to-br from-blue-600 to-purple-600 shadow-md">
-                 <Truck size={18} />
-               </div>
-               <h1 className="font-outfit font-extrabold text-xl tracking-tight">Zynety</h1>
+           <header className="h-16 flex items-center justify-between px-4 bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-40 shrink-0">
+             <div className="flex items-center gap-3">
+               <img src="/Logo.png" alt="Logo" className="w-10 h-10 object-contain drop-shadow-sm" onError={(e) => { e.target.style.display = 'none'; }} />
+               <h1 className="font-outfit font-extrabold text-[22px] tracking-tight text-slate-800">Zynety Logistics</h1>
              </div>
              <div className="flex items-center gap-2 bg-blue-50 text-blue-600 px-3 py-1.5 rounded-full border border-blue-100 font-bold text-sm">
                <MapPin size={14} /> Mumbai
@@ -156,12 +154,10 @@ export default function App() {
         )}
 
         {role === 'driver' && (
-           <header className="h-14 flex items-center justify-between px-4 bg-slate-900 border-b border-slate-800 sticky top-0 z-40 shrink-0 text-white">
-             <div className="flex items-center gap-2">
-               <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white bg-gradient-to-br from-orange-500 to-red-500 shadow-md">
-                 <Truck size={18} />
-               </div>
-               <h1 className="font-outfit font-extrabold text-xl tracking-tight">Zynety <span className="text-xs font-bold bg-orange-500 px-2 py-0.5 rounded-md ml-1 inline-block align-middle pb-[3px]">Partner</span></h1>
+           <header className="h-16 flex items-center justify-between px-4 bg-slate-900 border-b border-slate-800 sticky top-0 z-40 shrink-0 text-white">
+             <div className="flex items-center gap-3">
+               <img src="/Logo.png" alt="Logo" className="w-10 h-10 object-contain bg-white rounded-lg p-1" onError={(e) => { e.target.style.display = 'none'; }} />
+               <h1 className="font-outfit font-extrabold text-[20px] tracking-tight">Zynety Logistics <span className="text-xs font-bold bg-orange-500 px-2 py-0.5 rounded-md ml-1 inline-block align-middle pb-[3px]">Partner</span></h1>
              </div>
            </header>
         )}

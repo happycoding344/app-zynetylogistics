@@ -124,11 +124,20 @@ function zynety_api_create_booking(WP_REST_Request $request) {
     if(!$params) $params = $request->get_body_params();
     
     $user_id = isset($params['user_id']) ? intval($params['user_id']) : 0;
+    
+    // Extended Meta Data
+    $sender_name = sanitize_text_field($params['sender_name']);
+    $sender_phone = sanitize_text_field($params['sender_phone']);
     $pickup = sanitize_text_field($params['pickup']);
+    $pickup_pincode = sanitize_text_field($params['pickup_pincode']);
+    
+    $receiver_name = sanitize_text_field($params['receiver_name']);
+    $receiver_phone = sanitize_text_field($params['receiver_phone']);
     $drop = sanitize_text_field($params['drop']);
+    $drop_pincode = sanitize_text_field($params['drop_pincode']);
     
     $post_id = wp_insert_post([
-        'post_title' => 'Booking: ' . $pickup . ' to ' . $drop,
+        'post_title' => 'Booking: ' . $pickup_pincode . ' to ' . $drop_pincode,
         'post_type' => 'zynety_booking',
         'post_status' => 'publish',
         'post_author' => $user_id
@@ -136,8 +145,16 @@ function zynety_api_create_booking(WP_REST_Request $request) {
     
     if(is_wp_error($post_id)) return $post_id;
     
-    update_post_meta($post_id, 'pickup_pincode', $pickup);
-    update_post_meta($post_id, 'drop_pincode', $drop);
+    update_post_meta($post_id, 'sender_name', $sender_name);
+    update_post_meta($post_id, 'sender_phone', $sender_phone);
+    update_post_meta($post_id, 'pickup_address', $pickup);
+    update_post_meta($post_id, 'pickup_pincode', $pickup_pincode);
+    
+    update_post_meta($post_id, 'receiver_name', $receiver_name);
+    update_post_meta($post_id, 'receiver_phone', $receiver_phone);
+    update_post_meta($post_id, 'drop_address', $drop);
+    update_post_meta($post_id, 'drop_pincode', $drop_pincode);
+    
     update_post_meta($post_id, 'service_type', sanitize_text_field($params['service']));
     update_post_meta($post_id, 'total_price', floatval($params['price']));
     update_post_meta($post_id, 'status', 'pending');
