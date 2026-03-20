@@ -13,6 +13,24 @@ export default function App() {
   const [isLogin, setIsLogin] = useState(true);
   const [user, setUser] = useState(null); 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Check for existing session on mount
+  React.useEffect(() => {
+    const savedUser = localStorage.getItem('zynety_user');
+    if (savedUser) {
+      try {
+        const userData = JSON.parse(savedUser);
+        setUser(userData);
+        setIsAuthenticated(true);
+        setRole(userData.role || 'customer');
+        setEmail(userData.email || '');
+      } catch (e) {
+        console.error("Failed to parse saved user", e);
+      }
+    }
+    setIsLoading(false);
+  }, []);
 
   // Dynamically inject Tailwind CSS to bypass Vite production stripping
   React.useEffect(() => {
@@ -52,17 +70,36 @@ export default function App() {
       });
       const data = await res.json();
       if(data.status === 'success') {
-        setUser(data);
+        const userData = { ...data, role }; // Ensure role is included
+        localStorage.setItem('zynety_user', JSON.stringify(userData));
+        setUser(userData);
         setIsAuthenticated(true);
       } else {
         alert(data.message || "Authentication failed. Please try again.");
       }
     } catch (e) {
       console.warn("API Error, falling back to mock login for development", e);
-      setUser({ user_id: 1, email, role });
+      const mockUser = { user_id: 1, email, role };
+      localStorage.setItem('zynety_user', JSON.stringify(mockUser));
+      setUser(mockUser);
       setIsAuthenticated(true);
     }
   };
+
+  const handleLogout = () => {
+    localStorage.removeItem('zynety_user');
+    setIsAuthenticated(false);
+    setUser(null);
+    window.location.href = '/';
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     return (
