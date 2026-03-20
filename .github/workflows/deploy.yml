@@ -31,6 +31,6 @@ jobs:
           host: 145.79.211.27
           port: 65002
           username: u442506605
-          password: ${{ secrets.HOSTINGER_PASSWORD }}
+          key: ${{ secrets.HOSTINGER_SSH_KEY }}
           source: "dist/,index.php,zynety-app-plugin.php"
           target: "public_html/app/"
