@@ -74,7 +74,7 @@ export default function Contact() {
 
           {/* Open in Maps button — no iframe/API needed */}
           <a
-            href="https://maps.google.com/maps?q=Shakarpur,+East+Delhi,+Delhi+110092"
+            href="https://www.google.com/maps/search/?api=1&query=Bhogal+Complex,+Plot+No.+3,+4th+Floor,+Pvt+Shop+No.+404,+Veer+Shavarkar+Block,+Shakarpur,+East+Delhi,+Delhi+-+110092"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-3 bg-blue-50 border border-blue-100 rounded-2xl p-4 hover:bg-blue-100 transition-colors group"
