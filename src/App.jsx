@@ -6,6 +6,7 @@ import Book from './components/customer/Book';
 import Track from './components/customer/Track';
 import Orders from './components/shared/Orders';
 import Profile from './components/shared/Profile';
+import DriverHome from './components/driver/Home';
 
 export default function App() {
   const [role, setRole] = useState('customer'); // 'customer' | 'driver'
@@ -16,6 +17,35 @@ export default function App() {
   const [user, setUser] = useState(null); 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [liveCity, setLiveCity] = useState('Locating...');
+
+  React.useEffect(() => {
+    if (isAuthenticated && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          const key = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+          if (!key) { setLiveCity('Mumbai'); return; }
+          try {
+            const res = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${key}`);
+            const data = await res.json();
+            if (data.status === 'OK' && data.results[0]) {
+              const city = data.results[0].address_components.find(c => c.types.includes("locality"))?.long_name || 'Mumbai';
+              setLiveCity(city);
+            } else {
+              setLiveCity('Unknown Location');
+            }
+          } catch(e) {
+            setLiveCity('Mumbai');
+          }
+        },
+        () => setLiveCity('Mumbai')
+      );
+    } else if (isAuthenticated) {
+      setLiveCity('Mumbai');
+    }
+  }, [isAuthenticated]);
 
   // Check for existing session on mount
   React.useEffect(() => {
@@ -111,8 +141,13 @@ export default function App() {
             <img src="/Logo.png" alt="Zynety Logistics Logo" className="w-32 h-auto drop-shadow-2xl" onError={(e) => { e.target.style.display = 'none'; }} />
           </div>
           <h1 className="text-3xl font-extrabold text-slate-800 mb-2 font-outfit tracking-tight">Zynety Logistics</h1>
-          <p className="text-sm font-medium text-slate-500 mb-10">India's Unified Logistics Platform</p>
+          <p className="text-sm font-medium text-slate-500 mb-8">India's Unified Logistics Platform</p>
           
+          <div className="flex bg-slate-100 p-1 rounded-xl mb-6 shadow-inner">
+             <button onClick={() => setRole('customer')} className={`flex-1 py-2.5 text-sm font-black uppercase tracking-widest rounded-lg transition-all ${role === 'customer' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-400 hover:bg-slate-200'}`}>Customer</button>
+             <button onClick={() => setRole('driver')} className={`flex-1 py-2.5 text-sm font-black uppercase tracking-widest rounded-lg transition-all ${role === 'driver' ? 'bg-white shadow-sm text-slate-800' : 'text-slate-400 hover:bg-slate-200'}`}>Driver Partner</button>
+          </div>
+
           <div className="flex flex-col gap-4 text-left">
             <div>
               <label className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 block ml-1">Email Address</label>
@@ -179,13 +214,24 @@ export default function App() {
            
            <div className="p-4 flex flex-col gap-1 flex-1">
               <div className="text-xs font-bold text-slate-400 uppercase tracking-widest pl-4 mb-2 mt-4">Menu</div>
-              <NavItem icon={Home} label="Dashboard" href="/" />
-              <NavItem icon={Plus} label="New Booking" href="/book" />
-              <NavItem icon={Map} label="Live Tracking" href="/track" />
-              
-              <div className="text-xs font-bold text-slate-400 uppercase tracking-widest pl-4 mb-2 mt-8">Account</div>
-              <NavItem icon={User} label="My Profile" href="/profile" />
-              <NavItem icon={List} label="Order History" href="/orders" />
+              {role === 'driver' ? (
+                <>
+                  <NavItem icon={Home} label="Dashboard" href="/" />
+                  <NavItem icon={Map} label="Active Trips" href="/track" />
+                  <div className="text-xs font-bold text-slate-400 uppercase tracking-widest pl-4 mb-2 mt-8">Account</div>
+                  <NavItem icon={User} label="My Profile" href="/profile" />
+                  <NavItem icon={List} label="Earnings" href="/orders" />
+                </>
+              ) : (
+                <>
+                  <NavItem icon={Home} label="Dashboard" href="/" />
+                  <NavItem icon={Plus} label="New Booking" href="/book" />
+                  <NavItem icon={Map} label="Live Tracking" href="/track" />
+                  <div className="text-xs font-bold text-slate-400 uppercase tracking-widest pl-4 mb-2 mt-8">Account</div>
+                  <NavItem icon={User} label="My Profile" href="/profile" />
+                  <NavItem icon={List} label="Order History" href="/orders" />
+                </>
+              )}
            </div>
 
            <div className="p-4 border-t border-slate-100">
@@ -216,13 +262,25 @@ export default function App() {
                <button onClick={() => setIsSidebarOpen(false)} className="p-2 text-slate-500 hover:text-slate-800 bg-slate-50 rounded-full"><X size={20}/></button>
              </div>
              
-             <div className="p-3 flex flex-col gap-1 overflow-y-auto flex-1">
-                <NavItem icon={Home} label="Dashboard" href="/" />
-                <NavItem icon={Plus} label="New Booking" href="/book" />
-                <NavItem icon={Map} label="Live Tracking" href="/track" />
-                <div className="h-px bg-slate-100 my-2 mx-4"></div>
-                <NavItem icon={List} label="Order History" href="/orders" />
-                <NavItem icon={User} label="My Profile" href="/profile" />
+             <div className="p-3 flex flex-col gap-1 overflow-y-auto flex-1 mt-2">
+                {role === 'driver' ? (
+                  <>
+                    <NavItem icon={Home} label="Dashboard" href="/" />
+                    <NavItem icon={Map} label="Active Trips" href="/track" />
+                    <div className="h-px bg-slate-100 my-2 mx-4"></div>
+                    <NavItem icon={List} label="Earnings" href="/orders" />
+                    <NavItem icon={User} label="My Profile" href="/profile" />
+                  </>
+                ) : (
+                  <>
+                    <NavItem icon={Home} label="Dashboard" href="/" />
+                    <NavItem icon={Plus} label="New Booking" href="/book" />
+                    <NavItem icon={Map} label="Live Tracking" href="/track" />
+                    <div className="h-px bg-slate-100 my-2 mx-4"></div>
+                    <NavItem icon={List} label="Order History" href="/orders" />
+                    <NavItem icon={User} label="My Profile" href="/profile" />
+                  </>
+                )}
              </div>
           </aside>
         </div>
@@ -244,7 +302,7 @@ export default function App() {
                  <Activity size={14} className="text-green-500" /> Network Online
                </div>
                <div className="flex items-center gap-2 bg-blue-50 text-blue-600 px-3 py-1.5 rounded-full border border-blue-100 font-bold text-sm">
-                 <MapPin size={14} /> Mumbai
+                 <MapPin size={14} /> {liveCity}
                </div>
              </div>
           </header>
@@ -252,7 +310,11 @@ export default function App() {
           <main className="flex-1 overflow-y-auto">
             <div className="max-w-4xl mx-auto w-full h-full p-4 sm:p-6 lg:p-8">
               <Routes>
-                <Route path="/" element={<CustomerHome />} />
+                {role === 'driver' ? (
+                  <Route path="/" element={<DriverHome user={user} />} />
+                ) : (
+                  <Route path="/" element={<CustomerHome />} />
+                )}
                 <Route path="/book" element={<Book user={user} />} />
                 <Route path="/track" element={<Track />} />
                 <Route path="/profile" element={<Profile />} />
