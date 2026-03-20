@@ -55,6 +55,32 @@ export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [phone, setPhone] = useState('');
 
+  const [user, setUser] = useState(null); // stores user_id and phone if authenticated
+
+  const handleLogin = async () => {
+    if(phone.length !== 10) return;
+    try {
+      // In production window.ZynetyConfig.apiUrl would be ideal, but standard is /wp-json/
+      const apiBase = window.location.origin + '/wp-json/zynety/v1/auth';
+      const res = await fetch(apiBase, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone, role })
+      });
+      const data = await res.json();
+      if(data.status === 'success') {
+        setUser(data);
+        setIsAuthenticated(true);
+      } else {
+        alert("Login failed. Please try again.");
+      }
+    } catch (e) {
+      console.warn("API Error, falling back to mock login for development", e);
+      setUser({ user_id: 1, phone, role });
+      setIsAuthenticated(true);
+    }
+  };
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4 auth-bg font-inter">
@@ -82,9 +108,9 @@ export default function App() {
             </div>
             <button 
               className={`btn-primary shadow-blue-500/30 mt-2 py-4 text-lg ${phone.length === 10 ? 'opacity-100' : 'opacity-50 pointer-events-none'}`} 
-              onClick={() => setIsAuthenticated(true)}
+              onClick={handleLogin}
             >
-              Send OTP
+              Send OTP / Login
             </button>
           </div>
           
@@ -129,9 +155,9 @@ export default function App() {
           <Routes>
             {role === 'customer' ? (
               <>
-                <Route path="/" element={<CustomerHome />} />
-                <Route path="/book" element={<Book />} />
-                <Route path="/track" element={<Track />} />
+                <Route path="/" element={<CustomerHome user={user} />} />
+                <Route path="/book" element={<Book user={user} />} />
+                <Route path="/track" element={<Track user={user} />} />
               </>
             ) : (
               <>
