@@ -181,20 +181,37 @@ export default function Book({ user }) {
   };
 
   const confirmBooking = async (paymentId = 'direct_confirm') => {
+    let bookingId = null;
     try {
-      await fetch('https://zynetylogistics.com/wp-json/zynety/v1/bookings', {
+      const res = await fetch('https://zynetylogistics.com/wp-json/zynety/v1/bookings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...formData,
-          service: serviceQuery,
-          price: price?.total,
-          payment_id: paymentId,
-          user_id: user?.user_id || user?.id || 0,
+          // Match exact field names expected by the plugin
+          sender_name:    formData.sender_name,
+          sender_phone:   formData.sender_phone,
+          pickup:         formData.pickup_address,   // plugin expects 'pickup'
+          pickup_pincode: formData.pickup_pincode,
+          receiver_name:  formData.receiver_name,
+          receiver_phone: formData.receiver_phone,
+          drop:           formData.drop_address,     // plugin expects 'drop'
+          drop_pincode:   formData.drop_pincode,
+          service:        serviceQuery,
+          price:          price?.total,
+          distance:       price?.distance,
+          payment_id:     paymentId,
+          user_id:        user?.user_id || user?.id || 0,
         }),
       });
+      const data = await res.json();
+      if (data.status === 'success' && data.booking_id) {
+        bookingId = data.booking_id;
+        // Persist so Track page can fetch and display this booking's status
+        localStorage.setItem('zynety_last_booking_id', data.booking_id);
+        localStorage.setItem('zynety_last_booking_ref', data.booking_ref || '');
+      }
     } catch (e) {
-      console.warn('Backend offline — booking saved locally only.', e);
+      console.warn('Backend error — proceeding to confirmation screen:', e);
     }
     setStep(4);
   };
