@@ -11,77 +11,88 @@ export default function CustomerHome() {
       name: 'Two Wheeler',
       desc: 'Quick local deliveries',
       icon: Bike,
-      color: 'from-blue-500 to-blue-600',
-      bgLight: 'bg-blue-50',
-      iconColor: 'text-blue-600'
+      gradient: 'from-blue-600 to-cyan-500',
+      shadow: 'shadow-blue-500/20',
+      iconColor: 'text-white'
     },
     {
       id: 'truck',
-      name: 'Truck',
+      name: 'Trucks',
       desc: 'Heavy goods & furniture',
       icon: Truck,
-      color: 'from-purple-500 to-purple-600',
-      bgLight: 'bg-purple-50',
-      iconColor: 'text-purple-600'
+      gradient: 'from-purple-600 to-pink-500',
+      shadow: 'shadow-purple-500/20',
+      iconColor: 'text-white'
     },
     {
       id: 'packers',
       name: 'Packers & Movers',
       desc: 'Full house shifting',
       icon: PackageCheck,
-      color: 'from-orange-500 to-orange-600',
-      bgLight: 'bg-orange-50',
-      iconColor: 'text-orange-600'
+      gradient: 'from-orange-500 to-amber-400',
+      shadow: 'shadow-orange-500/20',
+      iconColor: 'text-white'
     },
     {
       id: 'intercity',
       name: 'Intercity',
       desc: 'Outstation transport',
       icon: Globe,
-      color: 'from-emerald-500 to-emerald-600',
-      bgLight: 'bg-emerald-50',
-      iconColor: 'text-emerald-600'
+      gradient: 'from-emerald-500 to-teal-400',
+      shadow: 'shadow-emerald-500/20',
+      iconColor: 'text-white'
     }
   ];
 
   return (
-    <div className="p-4 pb-20 animate-fade-in relative">
+    <div className="p-2 pb-20 animate-fade-in relative max-w-5xl mx-auto">
       {/* Welcome Section */}
-      <div className="mb-6 mt-2">
-        <h2 className="text-3xl font-extrabold text-gray-800 font-outfit tracking-tight">
-          What are we <br/> <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">moving today?</span>
+      <div className="mb-10 mt-4 px-2">
+        <h2 className="text-4xl md:text-5xl font-extrabold text-slate-800 font-outfit tracking-tight leading-tight">
+          What are we <br className="md:hidden" /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">moving today?</span>
         </h2>
-        <p className="text-gray-500 mt-2">Book a vehicle securely & instantly.</p>
+        <p className="text-slate-500 mt-3 text-lg font-medium">Book a vehicle securely & instantly.</p>
       </div>
 
       {/* Hero Banner Offer */}
-      <div className="glass-panel p-5 mb-8 relative overflow-hidden flex items-center justify-between shadow-blue-500/10 shadow-lg">
-        <div className="absolute -right-10 -top-10 w-32 h-32 bg-blue-100 rounded-full opacity-50 blur-2xl"></div>
-        <div className="absolute -left-10 -bottom-10 w-32 h-32 bg-purple-100 rounded-full opacity-50 blur-2xl"></div>
-        <div className="z-10">
-          <p className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">Limited Offer</p>
-          <h3 className="text-xl font-bold text-slate-800">Get 20% off <br/>on first ride</h3>
+      <div className="bg-gradient-to-r from-slate-900 to-slate-800 p-8 rounded-3xl mb-12 relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between shadow-2xl shadow-slate-900/20 group cursor-pointer hover:scale-[1.01] transition-transform">
+        <div className="absolute -right-20 -top-20 w-64 h-64 bg-blue-500 rounded-full opacity-20 blur-3xl group-hover:bg-purple-500 transition-colors duration-700"></div>
+        <div className="absolute -left-10 -bottom-10 w-40 h-40 bg-purple-500 rounded-full opacity-20 blur-2xl"></div>
+        <div className="z-10 mb-6 md:mb-0">
+          <p className="text-xs font-bold text-blue-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span> Limited Offer
+          </p>
+          <h3 className="text-2xl md:text-3xl font-extrabold text-white leading-tight">Get 20% off <br/>on your first ride.</h3>
         </div>
-        <div className="z-10 w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-500/30 transform rotate-[-10deg]">
-          <span className="font-extrabold text-2xl">%</span>
+        <div className="z-10 w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-500 border border-white/20 rounded-2xl flex items-center justify-center text-white shadow-xl transform md:rotate-[-10deg] group-hover:rotate-0 transition-transform duration-500">
+          <span className="font-extrabold text-3xl">%</span>
         </div>
       </div>
 
       {/* Services Grid */}
-      <h3 className="font-bold text-lg mb-4 font-outfit text-slate-800">Explore Services</h3>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="flex items-center justify-between px-2 mb-6">
+        <h3 className="font-extrabold text-xl md:text-2xl font-outfit text-slate-800 tracking-tight">Explore Services</h3>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {services.map((service) => (
           <div 
             key={service.id} 
             onClick={() => navigate(`/book?service=${service.id}`)}
-            className="glass-panel p-4 flex flex-col items-start gap-3 cursor-pointer hover:shadow-xl transition-all active:scale-[0.98] border border-transparent hover:border-gray-200"
+            className="group relative bg-white border border-slate-100 rounded-[2rem] p-6 cursor-pointer overflow-hidden transition-all duration-300 hover:shadow-2xl hover:border-slate-200 hover:-translate-y-1 block"
           >
-            <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${service.bgLight}`}>
-              <service.icon size={24} className={service.iconColor} strokeWidth={2.5} />
+            <div className={`absolute -right-16 -top-16 w-40 h-40 bg-gradient-to-br ${service.gradient} opacity-5 rounded-full group-hover:scale-150 transition-transform duration-700`}></div>
+            
+            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center bg-gradient-to-br ${service.gradient} shadow-lg ${service.shadow} mb-6 relative z-10 transform group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-300`}>
+              <service.icon size={28} className={service.iconColor} strokeWidth={2.5} />
             </div>
-            <div>
-              <h4 className="font-bold text-slate-800 mb-0.5">{service.name}</h4>
-              <p className="text-xs text-slate-500 leading-tight">{service.desc}</p>
+            
+            <div className="relative z-10">
+              <h4 className="font-extrabold text-lg text-slate-800 mb-1.5">{service.name}</h4>
+              <p className="text-sm font-medium text-slate-500 leading-relaxed">{service.desc}</p>
+            </div>
+            
+            <div className="absolute bottom-6 right-6 w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors z-10 hidden sm:flex">
+              <ChevronRight size={20} strokeWidth={3} />
             </div>
           </div>
         ))}
