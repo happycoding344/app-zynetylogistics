@@ -33,4 +33,4 @@ jobs:
           username: u442506605
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
           source: "dist/,index.php,zynety-app-plugin.php"
-          target: "public_html/app/"
+          target: "domains/zynetylogistics.com/public_html/app/"
