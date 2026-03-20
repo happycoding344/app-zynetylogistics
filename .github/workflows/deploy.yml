@@ -25,18 +25,7 @@ jobs:
       - name: Build Project
         run: npm run build
 
-      - name: Clear Old WordPress from Subdomain
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: 145.79.211.27
-          port: 65002
-          username: u442506605
-          key: ${{ secrets.HOSTINGER_SSH_KEY }}
-          script: |
-            rm -rf domains/app.zynetylogistics.com/public_html/* || true
-            rm -rf domains/zynetylogistics.com/public_html/app/* || true
-
-      - name: Deploy React App to Subdomain
+      - name: Deploy React App to Subdomain Directory
         uses: appleboy/scp-action@v0.1.7
         with:
           host: 145.79.211.27
@@ -44,8 +33,25 @@ jobs:
           username: u442506605
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
           source: "dist/"
-          target: "domains/app.zynetylogistics.com/public_html/"
+          target: "domains/zynetylogistics.com/public_html/app/"
           strip_components: 1
+          
+      - name: Create basic htaccess for React Router
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 145.79.211.27
+          port: 65002
+          username: u442506605
+          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          script: |
+            echo "<IfModule mod_rewrite.c>
+            RewriteEngine On
+            RewriteBase /
+            RewriteRule ^index\.html$ - [L]
+            RewriteCond %{REQUEST_FILENAME} !-f
+            RewriteCond %{REQUEST_FILENAME} !-d
+            RewriteRule . /index.html [L]
+            </IfModule>" > domains/zynetylogistics.com/public_html/app/.htaccess
           
       - name: Deploy Backend Plugin to Main Domain
         uses: appleboy/scp-action@v0.1.7
