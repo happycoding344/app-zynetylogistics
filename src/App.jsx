@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useNavigate, Link } from 'react-router-dom';
 import { Truck, Package, Bike, ArrowRight, User, Star, ChevronRight, Activity, MapPin, Search, Plus, List, Navigation, Menu, X, Home, Compass, Map } from 'lucide-react';
 import CustomerHome from './components/customer/Home';
 import Book from './components/customer/Book';
@@ -157,10 +157,10 @@ export default function App() {
   const NavItem = ({ icon: Icon, label, href }) => {
     const isActive = window.location.pathname === href;
     return (
-      <a href={href} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 font-bold ${isActive ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}>
+      <Link to={href} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 font-bold ${isActive ? 'bg-blue-50 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}>
         <Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
         {label}
-      </a>
+      </Link>
     );
   };
 
@@ -253,6 +253,8 @@ export default function App() {
                 <Route path="/" element={<CustomerHome />} />
                 <Route path="/book" element={<Book user={user} />} />
                 <Route path="/track" element={<Track />} />
+                <Route path="/profile" element={<div className="p-8 text-center text-slate-500 font-bold">Profile Settings Coming Soon</div>} />
+                <Route path="/orders" element={<div className="p-8 text-center text-slate-500 font-bold">Order History Coming Soon</div>} />
               </Routes>
             </div>
           </main>
