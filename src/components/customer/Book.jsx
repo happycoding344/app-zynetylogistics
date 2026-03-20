@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, MapPin, Truck, CheckCircle2, ChevronRight, User, Phone, Search, Navigation } from 'lucide-react';
+import { ArrowLeft, MapPin, Truck, CheckCircle2, ChevronRight, User, Phone, Search, Navigation, Activity } from 'lucide-react';
 import { useJsApiLoader, Autocomplete, GoogleMap, Marker } from '@react-google-maps/api';
 
 const libraries = ['places'];
