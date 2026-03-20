@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, MapPin, CheckCircle2, Search, Navigation, Activity, ArrowRight, AlertTriangle } from 'lucide-react';
 import { useJsApiLoader, Autocomplete, GoogleMap, Marker } from '@react-google-maps/api';
@@ -55,6 +55,40 @@ export default function Book({ user }) {
 
   const pickupAutoRef = useRef(null);
   const dropAutoRef = useRef(null);
+  const [gpsStatus, setGpsStatus] = useState('idle'); // idle | loading | done | denied
+
+  // ─── GPS AUTO-FILL PICKUP LOCATION ─────────────────────────────────────
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+    setGpsStatus('loading');
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        setPickupCoords({ lat, lng });
+        const key = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+        if (!key) { setGpsStatus('done'); return; }
+        try {
+          const res = await fetch(
+            `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${key}`
+          );
+          const data = await res.json();
+          if (data.status === 'OK' && data.results[0]) {
+            const place = data.results[0];
+            const pinComp = place.address_components?.find(c => c.types.includes('postal_code'));
+            setFormData(prev => ({
+              ...prev,
+              pickup_address: place.formatted_address || '',
+              pickup_pincode: pinComp?.long_name || prev.pickup_pincode,
+            }));
+          }
+        } catch (_) { /* silent fail */ }
+        setGpsStatus('done');
+      },
+      () => setGpsStatus('denied'),
+      { timeout: 8000, maximumAge: 60000 }
+    );
+  }, []);
 
   // ─── HANDLERS ─────────────────────────────────────────────────────────
   const handleChange = (e) => setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -254,6 +288,26 @@ export default function Book({ user }) {
                 <span className="w-8 h-8 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center"><MapPin size={18} /></span>
                 Sender & Pickup
               </h2>
+
+              {/* GPS Status Banner */}
+              {gpsStatus === 'loading' && (
+                <div className="flex items-center gap-2 bg-blue-50 border border-blue-100 rounded-xl px-3 py-2 mb-4 text-xs font-bold text-blue-600">
+                  <span className="w-3 h-3 border-2 border-blue-400 border-t-blue-600 rounded-full animate-spin shrink-0" />
+                  Detecting your location to autofill pickup address…
+                </div>
+              )}
+              {gpsStatus === 'done' && formData.pickup_address && (
+                <div className="flex items-center gap-2 bg-green-50 border border-green-100 rounded-xl px-3 py-2 mb-4 text-xs font-bold text-green-600">
+                  <Navigation size={12} className="shrink-0" />
+                  Pickup address autofilled from your GPS location. You can edit it.
+                </div>
+              )}
+              {gpsStatus === 'denied' && (
+                <div className="flex items-center gap-2 bg-amber-50 border border-amber-100 rounded-xl px-3 py-2 mb-4 text-xs font-bold text-amber-600">
+                  <MapPin size={12} className="shrink-0" />
+                  Location permission denied. Please type your pickup address manually.
+                </div>
+              )}
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
                 <div>

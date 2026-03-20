@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate, Link } from 'react-router-dom';
-import { Truck, Package, Bike, ArrowRight, User, Star, ChevronRight, Activity, MapPin, Search, Plus, List, Navigation, Menu, X, Home, Compass, Map, Power, LogOut } from 'lucide-react';
+import { Truck, Package, Bike, ArrowRight, User, Star, ChevronRight, Activity, MapPin, Search, Plus, List, Navigation, Menu, X, Home, Compass, Map, Power, LogOut, Phone } from 'lucide-react';
 import CustomerHome from './components/customer/Home';
+import BookSelect from './components/customer/BookSelect';
 import Book from './components/customer/Book';
 import Track from './components/customer/Track';
 import Orders from './components/shared/Orders';
 import Profile from './components/shared/Profile';
+import Contact from './components/shared/Contact';
 import DriverHome from './components/driver/Home';
 
 export default function App() {
@@ -228,11 +230,12 @@ export default function App() {
               ) : (
                 <>
                   <NavItem icon={Home} label="Dashboard" href="/" />
-                  <NavItem icon={Plus} label="New Booking" href="/book" />
+                  <NavItem icon={Plus} label="New Booking" href="/book-select" />
                   <NavItem icon={Map} label="Live Tracking" href="/track" />
                   <div className="text-xs font-bold text-slate-400 uppercase tracking-widest pl-4 mb-2 mt-8">Account</div>
                   <NavItem icon={User} label="My Profile" href="/profile" />
                   <NavItem icon={List} label="Order History" href="/orders" />
+                  <NavItem icon={Phone} label="Contact Us" href="/contact" />
                   <button onClick={handleLogout} className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 font-bold text-red-500 hover:bg-red-50 mt-2">
                     <LogOut size={20} strokeWidth={2} /> Sign Out
                   </button>
@@ -283,11 +286,12 @@ export default function App() {
                 ) : (
                   <>
                     <NavItem icon={Home} label="Dashboard" href="/" />
-                    <NavItem icon={Plus} label="New Booking" href="/book" />
+                    <NavItem icon={Plus} label="New Booking" href="/book-select" />
                     <NavItem icon={Map} label="Live Tracking" href="/track" />
                     <div className="h-px bg-slate-100 my-2 mx-4"></div>
                     <NavItem icon={List} label="Order History" href="/orders" />
                     <NavItem icon={User} label="My Profile" href="/profile" />
+                    <NavItem icon={Phone} label="Contact Us" href="/contact" />
                     <button onClick={handleLogout} className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 font-bold text-red-500 hover:bg-red-50 mt-2 w-full text-left">
                       <LogOut size={20} strokeWidth={2} /> Sign Out
                     </button>
@@ -327,10 +331,12 @@ export default function App() {
                 ) : (
                   <Route path="/" element={<CustomerHome />} />
                 )}
+                <Route path="/book-select" element={<BookSelect />} />
                 <Route path="/book" element={<Book user={user} />} />
                 <Route path="/track" element={<Track />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/orders" element={<Orders />} />
+                <Route path="/contact" element={<Contact />} />
               </Routes>
             </div>
           </main>
