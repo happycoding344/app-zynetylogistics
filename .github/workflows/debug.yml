@@ -1,0 +1,30 @@
+name: Debug Hostinger Structure
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  debug-ssh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run SSH Commands
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 145.79.211.27
+          port: 65002
+          username: u442506605
+          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          script: |
+            echo "--- PWD ---"
+            pwd
+            echo "--- LS ---"
+            ls -la
+            echo "--- PUBLIC HTML ROOT ---"
+            ls -la public_html || echo "no public_html here"
+            echo "--- DOMAINS ROOT ---"
+            ls -la domains || echo "no domains folder here"
+            echo "--- FIND WP-CONFIG ---"
+            find . -maxdepth 4 -name "wp-config.php" || echo ""
