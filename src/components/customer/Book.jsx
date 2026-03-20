@@ -22,8 +22,8 @@ export default function Book({ user }) {
   const [searchParams] = useSearchParams();
   const serviceQuery = searchParams.get('service') || 'bike';
 
-  const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+  const { isLoaded, loadError } = useJsApiLoader({
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "",
     libraries: libraries,
   });
 
@@ -42,6 +42,16 @@ export default function Book({ user }) {
     drop_address: '',
     drop_pincode: '',
   });
+
+  if (loadError) {
+    return (
+      <div className="p-8 m-4 bg-red-50 border border-red-200 rounded-2xl text-center shadow-sm">
+        <h2 className="text-red-700 font-bold mb-2">Maps API Loading Error</h2>
+        <p className="text-red-600 text-sm">Failed to load Google Maps wrapper. Please check your GitHub Secrets for VITE_GOOGLE_MAPS_API_KEY.</p>
+        <p className="text-red-500 text-xs mt-2">{loadError.message || 'Unknown network error.'}</p>
+      </div>
+    );
+  }
 
   // Lat/Lng for Map
   const [pickupCoords, setPickupCoords] = useState(null);
