@@ -145,12 +145,15 @@ function zynety_api_auth(WP_REST_Request $request) {
 
     // Generate a simple auth token tied to user
     $token = wp_hash($user->ID . $email . wp_salt());
+    // Store the token so we can verify API calls later
+    update_user_meta($user->ID, 'zynety_auth_token', $token);
+    update_user_meta($user->ID, 'zynety_email', $email);
 
     return rest_ensure_response([
         'status'       => 'success',
         'user_id'      => $user->ID,
         'email'        => $email,
-        'display_name' => get_user_meta($user->ID, 'zynety_display_name', true) ?: '',
+        'display_name' => get_user_meta($user->ID, 'zynety_display_name', true) ?: explode('@', $email)[0],
         'phone'        => get_user_meta($user->ID, 'zynety_phone', true) ?: '',
         'role'         => $role,
         'auth_token'   => $token,
@@ -179,8 +182,26 @@ function zynety_api_create_booking(WP_REST_Request $request) {
     $payment_id     = sanitize_text_field($params['payment_id']    ?? '');
     $distance       = sanitize_text_field($params['distance']      ?? '');
 
+    // Resolve real WordPress user_id from auth_token header if user_id is 0
+    if ($user_id === 0) {
+        $token_header = isset($_SERVER['HTTP_X_ZYNETY_TOKEN']) ? sanitize_text_field($_SERVER['HTTP_X_ZYNETY_TOKEN']) : '';
+        $user_email_param = sanitize_email($params['user_email'] ?? '');
+        if (!empty($user_email_param)) {
+            $wp_user = get_user_by('email', $user_email_param);
+            if ($wp_user) $user_id = $wp_user->ID;
+        }
+    }
+
+    // Get user email for persistent lookup
+    $user_email_for_meta = '';
+    if ($user_id > 0) {
+        $wp_user = get_user_by('id', $user_id);
+        if ($wp_user) $user_email_for_meta = $wp_user->user_email;
+    }
+
+    $ref = 'ZYN-' . strtoupper(substr(md5(time() . rand()), 0, 6));
     $post_id = wp_insert_post([
-        'post_title'  => 'ZYN-' . strtoupper(substr(md5(time()), 0, 6)) . ': ' . $pickup_pincode . ' → ' . $drop_pincode,
+        'post_title'  => $ref . ': ' . $pickup_pincode . ' → ' . $drop_pincode,
         'post_type'   => 'zynety_booking',
         'post_status' => 'publish',
         'post_author' => $user_id,
@@ -201,6 +222,8 @@ function zynety_api_create_booking(WP_REST_Request $request) {
         'total_price'    => $price,
         'distance_km'    => $distance,
         'payment_id'     => $payment_id,
+        'booking_ref'    => $ref,
+        'user_email'     => $user_email_for_meta,  // ← persist email for lookup
         'status'         => 'confirmed',
         'driver_id'      => 0,
         'driver_name'    => '',
@@ -210,9 +233,9 @@ function zynety_api_create_booking(WP_REST_Request $request) {
     }
 
     return rest_ensure_response([
-        'status'     => 'success',
-        'booking_id' => $post_id,
-        'booking_ref'=> get_the_title($post_id),
+        'status'      => 'success',
+        'booking_id'  => $post_id,
+        'booking_ref' => get_the_title($post_id),
     ]);
 }
 
@@ -220,23 +243,35 @@ function zynety_api_create_booking(WP_REST_Request $request) {
 // 7. GET BOOKINGS (for a user or all)
 // ==============================================
 function zynety_api_get_bookings(WP_REST_Request $request) {
-    $user_id = intval($request->get_param('user_id') ?? 0);
-    $status  = sanitize_text_field($request->get_param('status') ?? '');
+    $user_id    = intval($request->get_param('user_id') ?? 0);
+    $user_email = sanitize_email($request->get_param('user_email') ?? '');
+    $status     = sanitize_text_field($request->get_param('status') ?? '');
+
+    // If user_id is 0 or 1 (likely a mock ID), try resolving real ID by email
+    if (($user_id <= 1) && !empty($user_email)) {
+        $wp_user = get_user_by('email', $user_email);
+        if ($wp_user) $user_id = $wp_user->ID;
+    }
 
     $args = [
         'post_type'      => 'zynety_booking',
-        'posts_per_page' => 50,
+        'posts_per_page' => 100,
         'post_status'    => 'publish',
         'orderby'        => 'date',
         'order'          => 'DESC',
     ];
 
     if ($user_id > 0) {
+        // Find by WordPress post author
         $args['author'] = $user_id;
+    } elseif (!empty($user_email)) {
+        // Fallback: search by stored user_email meta
+        $args['meta_query'] = [['key' => 'user_email', 'value' => $user_email, 'compare' => '=']];
     }
 
     if (!empty($status)) {
-        $args['meta_query'] = [['key' => 'status', 'value' => $status]];
+        $existing_meta = $args['meta_query'] ?? [];
+        $args['meta_query'] = array_merge($existing_meta, [['key' => 'status', 'value' => $status]]);
     }
 
     $posts = get_posts($args);

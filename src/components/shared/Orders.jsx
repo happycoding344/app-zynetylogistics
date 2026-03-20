@@ -90,14 +90,21 @@ export default function Orders() {
         const savedUser = localStorage.getItem('zynety_user');
         const user = savedUser ? JSON.parse(savedUser) : null;
         const userId = user?.user_id || user?.id || 0;
+        const userEmail = user?.email || '';
 
-        if (!userId) {
+        if (!userId && !userEmail) {
           setError('Please log in to view your order history.');
           setLoading(false);
           return;
         }
 
-        const res = await fetch(`${API_BASE}/bookings?user_id=${userId}`, {
+        // Send both user_id and user_email so the API always finds bookings
+        // even if user_id was from mock fallback
+        const params = new URLSearchParams();
+        if (userId) params.set('user_id', userId);
+        if (userEmail) params.set('user_email', userEmail);
+
+        const res = await fetch(`${API_BASE}/bookings?${params.toString()}`, {
           headers: { 'Content-Type': 'application/json' }
         });
 
@@ -111,7 +118,7 @@ export default function Orders() {
         }
       } catch (e) {
         console.error('Orders fetch error:', e);
-        setError('Unable to load orders. Please check your connection.');
+        setError('Unable to load orders. Please check your connection and try again.');
       } finally {
         setLoading(false);
       }

@@ -190,17 +190,18 @@ export default function Book({ user }) {
           // Match exact field names expected by the plugin
           sender_name:    formData.sender_name,
           sender_phone:   formData.sender_phone,
-          pickup:         formData.pickup_address,   // plugin expects 'pickup'
+          pickup:         formData.pickup_address,
           pickup_pincode: formData.pickup_pincode,
           receiver_name:  formData.receiver_name,
           receiver_phone: formData.receiver_phone,
-          drop:           formData.drop_address,     // plugin expects 'drop'
+          drop:           formData.drop_address,
           drop_pincode:   formData.drop_pincode,
           service:        serviceQuery,
           price:          price?.total,
           distance:       price?.distance,
           payment_id:     paymentId,
           user_id:        user?.user_id || user?.id || 0,
+          user_email:     user?.email || '',   // ← ensures booking is always linked to the user
         }),
       });
       const data = await res.json();
