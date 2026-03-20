@@ -4,6 +4,8 @@ import { Truck, Package, Bike, ArrowRight, User, Star, ChevronRight, Activity, M
 import CustomerHome from './components/customer/Home';
 import Book from './components/customer/Book';
 import Track from './components/customer/Track';
+import Orders from './components/shared/Orders';
+import Profile from './components/shared/Profile';
 
 export default function App() {
   const [role, setRole] = useState('customer'); // 'customer' | 'driver'
@@ -253,8 +255,8 @@ export default function App() {
                 <Route path="/" element={<CustomerHome />} />
                 <Route path="/book" element={<Book user={user} />} />
                 <Route path="/track" element={<Track />} />
-                <Route path="/profile" element={<div className="p-8 text-center text-slate-500 font-bold">Profile Settings Coming Soon</div>} />
-                <Route path="/orders" element={<div className="p-8 text-center text-slate-500 font-bold">Order History Coming Soon</div>} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/orders" element={<Orders />} />
               </Routes>
             </div>
           </main>

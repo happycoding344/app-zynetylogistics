@@ -184,7 +184,7 @@ export default function Book({ user }) {
     );
   };
 
-  const confirmBooking = async () => {
+  const confirmBooking = async (paymentId = 'mock_success') => {
     try {
       const apiBase = 'https://zynetylogistics.com/wp-json/zynety/v1/bookings';
       const res = await fetch(apiBase, {
@@ -196,6 +196,7 @@ export default function Book({ user }) {
           drop: formData.drop_address,
           service: serviceQuery, 
           price: price.total,
+          payment_id: paymentId,
           user_id: user?.user_id || 1 
         })
       });
@@ -205,6 +206,46 @@ export default function Book({ user }) {
       console.warn("Backend not reachable or plugin not active.", e);
     }
     setStep(4);
+  };
+
+  const handlePayment = async () => {
+    if (!window.Razorpay) {
+      alert("Razorpay payment gateway failed to load. Please verify your connection.");
+      return;
+    }
+
+    if (!import.meta.env.VITE_RAZORPAY_KEY_ID) {
+      console.warn("No Razorpay Key provided. Bypassing payment gateway for development.");
+      confirmBooking('dev_bypass_no_key');
+      return;
+    }
+
+    const options = {
+      key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+      amount: price.total * 100, // exact paise conversion
+      currency: "INR",
+      name: "Zynety Logistics",
+      description: `Logistics Service: ${serviceQuery.toUpperCase()}`,
+      image: "https://app.zynetylogistics.com/Logo.png",
+      handler: function (response) {
+        // Payment successful
+        confirmBooking(response.razorpay_payment_id);
+      },
+      prefill: {
+        name: formData.sender_name || user?.email || "Zynety Customer",
+        email: user?.email || "booking@zynetylogistics.com",
+        contact: formData.sender_phone || "9999999999"
+      },
+      theme: {
+        color: "#2563EB"
+      }
+    };
+
+    const rzp = new window.Razorpay(options);
+    rzp.on('payment.failed', function (response){
+        alert("Payment Failed: " + response.error.description);
+    });
+    rzp.open();
   };
 
   return (
@@ -426,8 +467,8 @@ export default function Book({ user }) {
                         <span className="text-white text-4xl font-black tracking-tighter">₹{price.total}</span>
                       </div>
                     </div>
-                    <button onClick={confirmBooking} className="py-4 px-8 bg-white text-slate-900 rounded-2xl font-black text-lg shadow-xl hover:scale-[1.03] active:scale-[0.97] transition-all">
-                       Book Now
+                    <button onClick={handlePayment} className="py-4 px-8 bg-white text-slate-900 rounded-2xl font-black text-lg shadow-xl hover:scale-[1.03] active:scale-[0.97] transition-all">
+                       Book & Pay Now
                     </button>
                  </div>
                  <p className="text-[9px] text-center text-slate-600 mt-6 font-bold uppercase tracking-widest">Zynety Logistics Private Limited • Verified Pricing</p>
