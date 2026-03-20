@@ -14,6 +14,32 @@ export default function App() {
   const [user, setUser] = useState(null); 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  // Dynamically inject Tailwind CSS to bypass Vite production stripping
+  React.useEffect(() => {
+    if (!document.getElementById('tailwind-cdn')) {
+      const script = document.createElement('script');
+      script.id = 'tailwind-cdn';
+      script.src = 'https://cdn.tailwindcss.com';
+      script.async = true;
+      document.head.appendChild(script);
+
+      const config = document.createElement('script');
+      config.innerHTML = `
+        tailwind.config = {
+          theme: {
+            extend: {
+              fontFamily: {
+                inter: ['Inter', 'sans-serif'],
+                outfit: ['Outfit', 'sans-serif'],
+              }
+            }
+          }
+        }
+      `;
+      document.head.appendChild(config);
+    }
+  }, []);
+
   const handleAuth = async () => {
     if(!email || !password) return;
     try {
