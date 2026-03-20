@@ -1,0 +1,36 @@
+name: Deploy to Hostinger Live
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build Project
+        run: npm run build
+
+      - name: Deploy application to Hostinger server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: 145.79.211.27
+          port: 65002
+          username: u442506605
+          password: ${{ secrets.HOSTINGER_PASSWORD }}
+          source: "dist/,index.php,zynety-app-plugin.php"
+          target: "public_html/app/"
