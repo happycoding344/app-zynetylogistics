@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-route
 import { Truck, Package, Bike, ArrowRight, User, Star, ChevronRight, Activity, MapPin, Search, Plus, List, Navigation, Menu, X, Home, Compass, Map } from 'lucide-react';
 import CustomerHome from './components/customer/Home';
 import Book from './components/customer/Book';
-import Track from './components/shared/Track';
+import Track from './components/customer/Track';
 
 export default function App() {
   const [role, setRole] = useState('customer'); // 'customer' | 'driver'
