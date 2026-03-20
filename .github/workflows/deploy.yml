@@ -25,12 +25,34 @@ jobs:
       - name: Build Project
         run: npm run build
 
-      - name: Deploy application to Hostinger server
+      - name: Clear Old WordPress from Subdomain
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 145.79.211.27
+          port: 65002
+          username: u442506605
+          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          script: |
+            rm -rf domains/app.zynetylogistics.com/public_html/* || true
+            rm -rf domains/zynetylogistics.com/public_html/app/* || true
+
+      - name: Deploy React App to Subdomain
         uses: appleboy/scp-action@v0.1.7
         with:
           host: 145.79.211.27
           port: 65002
           username: u442506605
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
-          source: "dist/,index.php,zynety-app-plugin.php"
-          target: "domains/zynetylogistics.com/public_html/app/"
+          source: "dist/"
+          target: "domains/app.zynetylogistics.com/public_html/"
+          strip_components: 1
+          
+      - name: Deploy Backend Plugin to Main Domain
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: 145.79.211.27
+          port: 65002
+          username: u442506605
+          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          source: "zynety-app-plugin.php"
+          target: "domains/zynetylogistics.com/public_html/wp-content/plugins/"
