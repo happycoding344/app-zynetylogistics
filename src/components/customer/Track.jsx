@@ -27,7 +27,7 @@ export default function Track() {
          <h2 className="text-xl font-outfit font-extrabold text-slate-800 tracking-tight mb-2">No Active Trips</h2>
          <p className="text-slate-500 font-medium text-sm leading-relaxed max-w-xs mx-auto">You don't have any ongoing deliveries right now. Once you book a fleet, you can track it live here.</p>
          
-         <button onClick={() => window.location.href='/book'} className="mt-8 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 px-8 rounded-xl shadow-lg shadow-blue-600/20 transition-all flex items-center gap-2">
+         <button onClick={() => window.location.href='/book-select'} className="mt-8 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 px-8 rounded-xl shadow-lg shadow-blue-600/20 transition-all flex items-center gap-2">
             Book a Delivery <ChevronRight size={18} />
          </button>
       </div>

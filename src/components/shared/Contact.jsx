@@ -72,28 +72,21 @@ export default function Contact() {
             </div>
           </div>
 
-          {/* Map Embed */}
-          <div className="rounded-2xl overflow-hidden border border-slate-100 shadow-sm">
-            <iframe
-              title="Zynety Logistics Office"
-              width="100%"
-              height="200"
-              style={{ border: 0 }}
-              loading="lazy"
-              allowFullScreen
-              referrerPolicy="no-referrer-when-downgrade"
-              src="https://www.google.com/maps/embed/v1/place?key=AIzaSyAbc123&q=Shakarpur,East+Delhi,Delhi+110092"
-              onError={(e) => { e.target.style.display = 'none'; }}
-            />
-            <a
-              href="https://goo.gl/maps/Shakarpur+East+Delhi"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 p-3 text-blue-600 font-bold text-sm bg-blue-50 hover:bg-blue-100 transition-colors"
-            >
-              <MapPin size={14} /> Open in Google Maps
-            </a>
-          </div>
+          {/* Open in Maps button — no iframe/API needed */}
+          <a
+            href="https://maps.google.com/maps?q=Shakarpur,+East+Delhi,+Delhi+110092"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-3 bg-blue-50 border border-blue-100 rounded-2xl p-4 hover:bg-blue-100 transition-colors group"
+          >
+            <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-blue-600/20 group-hover:scale-105 transition-transform">
+              <MapPin size={18} />
+            </div>
+            <div>
+              <p className="font-bold text-blue-700 text-sm">View on Google Maps</p>
+              <p className="text-blue-500 text-xs font-medium">Shakarpur, East Delhi — 110092</p>
+            </div>
+          </a>
         </div>
 
         {/* Contact Form */}
