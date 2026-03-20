@@ -53,30 +53,32 @@ const BottomNav = ({ role }) => {
 export default function App() {
   const [role, setRole] = useState('customer'); // 'customer' | 'driver'
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLogin, setIsLogin] = useState(true);
 
-  const [user, setUser] = useState(null); // stores user_id and phone if authenticated
+  const [user, setUser] = useState(null); // stores user_id and email if authenticated
 
-  const handleLogin = async () => {
-    if(phone.length !== 10) return;
+  const handleAuth = async () => {
+    if(!email || !password) return;
     try {
-      // In production window.ZynetyConfig.apiUrl would be ideal, but standard is /wp-json/
       const apiBase = window.location.origin + '/wp-json/zynety/v1/auth';
+      const action = isLogin ? 'login' : 'signup';
       const res = await fetch(apiBase, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone, role })
+        body: JSON.stringify({ email, password, action, role })
       });
       const data = await res.json();
       if(data.status === 'success') {
         setUser(data);
         setIsAuthenticated(true);
       } else {
-        alert("Login failed. Please try again.");
+        alert(data.message || "Authentication failed. Please try again.");
       }
     } catch (e) {
       console.warn("API Error, falling back to mock login for development", e);
-      setUser({ user_id: 1, phone, role });
+      setUser({ user_id: 1, email, role });
       setIsAuthenticated(true);
     }
   };
@@ -93,25 +95,39 @@ export default function App() {
           
           <div className="flex flex-col gap-4 text-left">
             <div>
-              <label className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 block ml-1">Mobile Number</label>
-              <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-slate-500 border-r border-gray-200 pr-3">+91</span>
-                <input 
-                  type="tel" 
-                  maxLength="10"
-                  className="input-field pl-16 font-bold tracking-widest text-lg" 
-                  placeholder="00000 00000"
-                  value={phone}
-                  onChange={e => setPhone(e.target.value.replace(/\D/g, ''))}
-                />
-              </div>
+              <label className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 block ml-1">Email Address</label>
+              <input 
+                type="email" 
+                className="input-field font-semibold text-base py-3 px-4 w-full border border-gray-200 rounded-xl" 
+                placeholder="you@email.com"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 block ml-1">Password</label>
+              <input 
+                type="password" 
+                className="input-field font-semibold text-base py-3 px-4 w-full border border-gray-200 rounded-xl mb-1" 
+                placeholder="••••••••"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+              />
             </div>
             <button 
-              className={`btn-primary shadow-blue-500/30 mt-2 py-4 text-lg ${phone.length === 10 ? 'opacity-100' : 'opacity-50 pointer-events-none'}`} 
-              onClick={handleLogin}
+              className={`btn-primary shadow-blue-500/30 mt-2 py-4 text-lg ${(email && password) ? 'opacity-100' : 'opacity-50 pointer-events-none'}`} 
+              onClick={handleAuth}
             >
-              Send OTP / Login
+              {isLogin ? 'Sign In' : 'Create Account'}
             </button>
+            <div className="text-center mt-2">
+              <button 
+                onClick={() => setIsLogin(!isLogin)} 
+                className="text-sm font-bold text-blue-600 hover:text-blue-800 transition-colors"
+              >
+                {isLogin ? "Don't have an account? Sign Up" : "Already have an account? Sign In"}
+              </button>
+            </div>
           </div>
           
           <p className="text-xs text-slate-400 mt-6 font-medium">By continuing, you agree to our Terms of Service & Privacy Policy.</p>
@@ -121,7 +137,7 @@ export default function App() {
   }
 
   return (
-    <Router basename="/app">
+    <Router>
       <div className="h-screen flex flex-col bg-[#F8FAFC] overflow-hidden text-slate-800 font-inter">
         
         {/* Top App Bar inside main flow */}

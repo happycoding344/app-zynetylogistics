@@ -72,22 +72,37 @@ add_action('rest_api_init', function () {
 });
 
 function zynety_api_auth(WP_REST_Request $request) {
-    if(!isset($request['phone']) || empty($request['phone'])) return new WP_Error('no_phone', 'Phone number required', ['status' => 400]);
-    $phone = sanitize_text_field($request['phone']);
+    $email = sanitize_email($request['email']);
+    $password = sanitize_text_field($request['password']);
+    $action = sanitize_text_field($request['action']); // 'login' or 'signup'
     $role = isset($request['role']) ? sanitize_text_field($request['role']) : 'customer';
     
-    // Basic mock logic: In production, send OTP and verify. For now, auto-login or create WP User by phone.
-    $user = get_user_by('login', $phone);
-    if(!$user) {
-        $user_id = wp_insert_user(['user_login' => $phone, 'user_pass' => wp_generate_password(), 'role' => 'subscriber']);
+    if(empty($email) || empty($password)) {
+        return new WP_Error('missing_creds', 'Email and Password are required', ['status' => 400]);
+    }
+    
+    if ($action === 'signup') {
+        if(email_exists($email) || username_exists($email)) {
+            return new WP_Error('exists', 'An account with this email already exists.', ['status' => 400]);
+        }
+        $user_id = wp_create_user($email, $password, $email);
         if(is_wp_error($user_id)) return $user_id;
+        
+        // Add the specific role (customer or driver) as metadata or WP role if custom roles exist
         $user = get_userdata($user_id);
+        $user->set_role('subscriber'); // Default to subscriber
+        update_user_meta($user_id, 'zynety_role', $role);
+    } else {
+        $user = wp_authenticate($email, $password);
+        if(is_wp_error($user)) {
+            return new WP_Error('invalid_login', 'Invalid email or password.', ['status' => 401]);
+        }
     }
     
     return rest_ensure_response([
         'status' => 'success',
         'user_id' => $user->ID,
-        'phone' => $phone,
+        'email' => $email,
         'role' => $role,
         'message' => 'Authenticated successfully'
     ]);
