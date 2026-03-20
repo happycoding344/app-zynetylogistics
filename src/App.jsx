@@ -231,7 +231,7 @@ export default function App() {
                 <>
                   <NavItem icon={Home} label="Dashboard" href="/" />
                   <NavItem icon={Plus} label="New Booking" href="/book-select" />
-                  <NavItem icon={Map} label="Live Tracking" href="/track" />
+
                   <div className="text-xs font-bold text-slate-400 uppercase tracking-widest pl-4 mb-2 mt-8">Account</div>
                   <NavItem icon={User} label="My Profile" href="/profile" />
                   <NavItem icon={List} label="Order History" href="/orders" />
@@ -287,7 +287,7 @@ export default function App() {
                   <>
                     <NavItem icon={Home} label="Dashboard" href="/" />
                     <NavItem icon={Plus} label="New Booking" href="/book-select" />
-                    <NavItem icon={Map} label="Live Tracking" href="/track" />
+
                     <div className="h-px bg-slate-100 my-2 mx-4"></div>
                     <NavItem icon={List} label="Order History" href="/orders" />
                     <NavItem icon={User} label="My Profile" href="/profile" />

@@ -22,7 +22,7 @@ const SERVICES = [
     subtitle: 'Heavy goods & furniture',
     details: 'Appliances, machinery, bulk cargo',
     eta: '1–3 hours',
-    base: '₹36/km',
+    base: '₹125 base + ₹30/km',
     icon: Truck,
     gradient: 'from-purple-600 to-pink-500',
     shadow: 'shadow-purple-500/20',

@@ -121,11 +121,10 @@ function BookingCard({ booking }) {
     day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
   });
 
+  const isActive = ['confirmed','driver_assigned','picked_up','in_transit'].includes(booking.status);
+
   return (
-    <button
-      onClick={() => navigate(`/track?booking_id=${booking.id}`)}
-      className="w-full bg-white border border-slate-100 rounded-3xl p-5 shadow-sm hover:shadow-lg hover:border-blue-100 transition-all text-left group"
-    >
+    <div className="w-full bg-white border border-slate-100 rounded-3xl p-5 shadow-sm hover:shadow-lg hover:border-blue-100 transition-all text-left">
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
@@ -162,9 +161,21 @@ function BookingCard({ booking }) {
             <span className="text-[9px] font-black text-slate-400 uppercase">{booking.distance_km} km</span></>
           )}
         </div>
-        <span className="font-extrabold text-slate-800 text-base">₹{booking.total_price}</span>
+        <div className="flex items-center gap-2">
+          <span className="font-extrabold text-slate-800">₹{booking.total_price}</span>
+          <button
+            onClick={() => navigate(`/track?booking_id=${booking.id}`)}
+            className={`flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider px-3 py-1.5 rounded-xl transition-all ${
+              isActive
+                ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-600/20'
+                : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
+            }`}
+          >
+            <Navigation size={11} /> {isActive ? 'Track Live' : 'View Details'}
+          </button>
+        </div>
       </div>
-    </button>
+    </div>
   );
 }
 

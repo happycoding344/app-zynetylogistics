@@ -22,7 +22,8 @@ const SERVICES = [
     subtitle: 'Heavy goods & furniture',
     details: 'Appliances, machinery, bulk cargo',
     eta: '1–3 hours',
-    base: '₹36',
+    base: '₹125',
+    rate: '₹30',
     icon: Truck,
     gradient: 'from-purple-600 to-pink-500',
     shadow: 'shadow-purple-500/20',
@@ -105,7 +106,9 @@ export default function BookSelect() {
               </div>
               <p className="text-slate-500 text-sm font-medium">{s.details}</p>
               <div className="flex items-center gap-4 mt-2">
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">From {s.base}/km</span>
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                  {s.id === 'truck' ? `Base ₹125 + ₹30/km` : `From ${s.base}/km`}
+                </span>
                 <span className="text-[10px] font-black text-slate-300">•</span>
                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">ETA: {s.eta}</span>
               </div>

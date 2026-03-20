@@ -17,13 +17,13 @@ const MAP_CONTAINER_STYLE = {
 const MUMBAI_CENTER = { lat: 19.0760, lng: 72.8777 };
 
 const SERVICE_CONFIG = {
-  bike: { label: 'Two Wheeler', base: 16, color: 'blue' },
-  truck: { label: 'Truck', base: 36, color: 'purple' },
-  packers: { label: 'Packers & Movers', base: 500, color: 'orange' },
-  intercity: { label: 'Intercity', base: 50, color: 'emerald' },
+  bike:      { label: 'Two Wheeler',       base: 16,  rate: 16, color: 'blue' },
+  truck:     { label: 'Truck',             base: 125, rate: 30, color: 'purple' },
+  packers:   { label: 'Packers & Movers',  base: 500, rate: 16, color: 'orange' },
+  intercity: { label: 'Intercity',         base: 50,  rate: 30, color: 'emerald' },
 };
 
-const PER_KM_RATE = 16;
+const PER_KM_RATE = 16; // default fallback
 
 export default function Book({ user }) {
   const navigate = useNavigate();
@@ -170,8 +170,9 @@ export default function Book({ user }) {
         if (status === 'OK' && response.rows?.[0]?.elements?.[0]?.status === 'OK') {
           const distKm = response.rows[0].elements[0].distance.value / 1000;
           const basePrice = serviceInfo.base;
-          const totalPrice = Math.floor(basePrice + distKm * PER_KM_RATE);
-          setPrice({ distance: distKm.toFixed(1), total: totalPrice, base: basePrice });
+          const ratePerKm = serviceInfo.rate || PER_KM_RATE;
+          const totalPrice = Math.floor(basePrice + distKm * ratePerKm);
+          setPrice({ distance: distKm.toFixed(1), total: totalPrice, base: basePrice, rate: ratePerKm });
           setStep(3);
         } else {
           alert('Could not calculate distance. Please verify both addresses.');
