@@ -55,7 +55,18 @@ function zynety_register_cpts() {
 // ==============================================
 // 3. REST API ENDPOINTS
 // ==============================================
+
+// Allow requests from the app subdomain
 add_action('rest_api_init', function () {
+    // Add CORS support for the React App
+    remove_filter('rest_pre_serve_request', 'rest_send_cors_headers');
+    add_filter('rest_pre_serve_request', function( $value ) {
+        header('Access-Control-Allow-Origin: *');
+        header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+        header('Access-Control-Allow-Headers: Authorization, Content-Type');
+        return $value;
+    });
+
     // Auth Endpoint
     register_rest_route('zynety/v1', '/auth', [
         'methods' => 'POST',

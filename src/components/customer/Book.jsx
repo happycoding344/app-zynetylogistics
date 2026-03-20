@@ -33,7 +33,7 @@ export default function Book({ user }) {
 
   const confirmBooking = async () => {
     try {
-      const apiBase = window.location.origin + '/wp-json/zynety/v1/bookings';
+      const apiBase = 'https://zynetylogistics.com/wp-json/zynety/v1/bookings';
       // Mute errors if we are testing locally without the WP plugin installed
       const res = await fetch(apiBase, {
         method: 'POST',

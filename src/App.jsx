@@ -62,7 +62,7 @@ export default function App() {
   const handleAuth = async () => {
     if(!email || !password) return;
     try {
-      const apiBase = window.location.origin + '/wp-json/zynety/v1/auth';
+      const apiBase = 'https://zynetylogistics.com/wp-json/zynety/v1/auth';
       const action = isLogin ? 'login' : 'signup';
       const res = await fetch(apiBase, {
         method: 'POST',
