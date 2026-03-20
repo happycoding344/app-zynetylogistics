@@ -44,13 +44,32 @@ function zynety_app_settings_page() {
 add_action('init', 'zynety_register_cpts');
 function zynety_register_cpts() {
     register_post_type('zynety_booking', [
-        'labels' => ['name' => 'App Bookings', 'singular_name' => 'Booking'],
-        'public' => true,
-        'show_ui' => true,
-        'menu_icon' => 'dashicons-calendar-alt',
-        'supports' => ['title', 'custom-fields', 'author'],
+        'labels'       => ['name' => 'App Bookings', 'singular_name' => 'Booking'],
+        'public'       => true,
+        'show_ui'      => true,
+        'show_in_rest' => true,          // ← enables WP built-in REST API as fallback
+        'rest_base'    => 'zynety_booking',
+        'menu_icon'    => 'dashicons-calendar-alt',
+        'supports'     => ['title', 'custom-fields', 'author'],
     ]);
+
+    // Register all meta fields with REST API support so /wp/v2/zynety_booking returns meta
+    $meta_fields = [
+        'pickup_address', 'pickup_pincode', 'drop_address', 'drop_pincode',
+        'sender_name', 'sender_phone', 'receiver_name', 'receiver_phone',
+        'service_type', 'total_price', 'distance_km', 'payment_id',
+        'status', 'driver_id', 'driver_name', 'user_email', 'booking_ref',
+    ];
+    foreach ($meta_fields as $field) {
+        register_post_meta('zynety_booking', $field, [
+            'show_in_rest'  => true,
+            'single'        => true,
+            'type'          => 'string',
+            'auth_callback' => '__return_true',
+        ]);
+    }
 }
+
 
 // ==============================================
 // 3. CORS HEADERS (Allow React App)

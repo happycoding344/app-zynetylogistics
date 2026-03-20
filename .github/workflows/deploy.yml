@@ -39,7 +39,7 @@ jobs:
           target: "domains/zynetylogistics.com/public_html/app/"
           strip_components: 1
           
-      - name: Create basic htaccess for React Router
+      - name: Create htaccess for React Router
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: 145.79.211.27
@@ -55,8 +55,18 @@ jobs:
             RewriteCond %{REQUEST_FILENAME} !-d
             RewriteRule . /index.html [L]
             </IfModule>" > domains/zynetylogistics.com/public_html/app/.htaccess
-          
-      - name: Deploy Backend Plugin to Main Domain
+
+      - name: Ensure Plugin Directory Exists
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 145.79.211.27
+          port: 65002
+          username: u442506605
+          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          script: |
+            mkdir -p domains/zynetylogistics.com/public_html/wp-content/plugins/zynety-app-plugin
+
+      - name: Deploy Backend Plugin (into plugin folder)
         uses: appleboy/scp-action@v0.1.7
         with:
           host: 145.79.211.27
@@ -64,4 +74,23 @@ jobs:
           username: u442506605
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
           source: "zynety-app-plugin.php"
-          target: "domains/zynetylogistics.com/public_html/wp-content/plugins/"
+          target: "domains/zynetylogistics.com/public_html/wp-content/plugins/zynety-app-plugin/"
+
+      - name: Activate Plugin via WP-CLI
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 145.79.211.27
+          port: 65002
+          username: u442506605
+          key: ${{ secrets.HOSTINGER_SSH_KEY }}
+          script: |
+            cd domains/zynetylogistics.com/public_html
+            # Activate plugin if WP-CLI is available
+            if command -v wp &> /dev/null; then
+              wp plugin activate zynety-app-plugin --allow-root || true
+            fi
+            # Flush rewrite rules so new REST routes are registered
+            if command -v wp &> /dev/null; then
+              wp rewrite flush --allow-root || true
+            fi
+            echo "Plugin deployed successfully to: wp-content/plugins/zynety-app-plugin/"
