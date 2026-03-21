@@ -76,7 +76,7 @@ jobs:
           source: "zynety-app-plugin.php"
           target: "domains/zynetylogistics.com/public_html/wp-content/plugins/zynety-app-plugin/"
 
-      - name: Activate Plugin via WP-CLI
+      - name: Activate Plugin & Clear Cache via WP-CLI
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: 145.79.211.27
@@ -88,9 +88,10 @@ jobs:
             # Activate plugin if WP-CLI is available
             if command -v wp &> /dev/null; then
               wp plugin activate zynety-app-plugin --allow-root || true
-            fi
-            # Flush rewrite rules so new REST routes are registered
-            if command -v wp &> /dev/null; then
               wp rewrite flush --allow-root || true
+              wp cache flush --allow-root || true
+              wp litespeed-purge all --allow-root || true
             fi
+            # Fallback file cache clearing
+            rm -rf wp-content/cache/* || true
             echo "Plugin deployed successfully to: wp-content/plugins/zynety-app-plugin/"
