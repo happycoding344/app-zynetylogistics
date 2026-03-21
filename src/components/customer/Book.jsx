@@ -40,6 +40,10 @@ export default function Book({ user }) {
   const [step, setStep] = useState(1);
   const [calculating, setCalculating] = useState(false);
   const [price, setPrice] = useState(null);
+  const [couponCode, setCouponCode] = useState('');
+  const [discount, setDiscount] = useState(0);
+  const [couponApplied, setCouponApplied] = useState(false);
+  const [couponError, setCouponError] = useState('');
   const [pickupCoords, setPickupCoords] = useState(null);
   const [dropCoords, setDropCoords] = useState(null);
   const [formData, setFormData] = useState({
@@ -172,13 +176,39 @@ export default function Book({ user }) {
           const basePrice = serviceInfo.base;
           const ratePerKm = serviceInfo.rate || PER_KM_RATE;
           const totalPrice = Math.floor(basePrice + distKm * ratePerKm);
-          setPrice({ distance: distKm.toFixed(1), total: totalPrice, base: basePrice, rate: ratePerKm });
+          setPrice({ distance: distKm.toFixed(1), total: totalPrice, base: basePrice, rate: ratePerKm, originalTotal: totalPrice });
+          setCouponCode('');
+          setCouponApplied(false);
+          setDiscount(0);
           setStep(3);
         } else {
           alert('Could not calculate distance. Please verify both addresses.');
         }
       }
     );
+  };
+
+  const applyCoupon = async () => {
+    if (couponCode.toLowerCase() !== 'zynety20') {
+      setCouponError('Invalid coupon code');
+      return;
+    }
+    setCouponError('');
+    try {
+      const res = await fetch(`https://zynetylogistics.com/wp-json/zynety/v1/bookings?user_id=${user?.user_id || user?.id || 0}`);
+      const data = await res.json();
+      const userBookings = Array.isArray(data) ? data.filter(b => b.meta?.user_email === user?.email) : [];
+      if (userBookings.length > 0) {
+        setCouponError('Coupon valid for first order only.');
+        return;
+      }
+      const discAmount = Math.floor(price.originalTotal * 0.20);
+      setDiscount(discAmount);
+      setPrice(prev => ({ ...prev, total: prev.originalTotal - discAmount }));
+      setCouponApplied(true);
+    } catch (e) {
+      setCouponError('Could not verify coupon eligibility. Try again.');
+    }
   };
 
   const confirmBooking = async (paymentId = 'direct_confirm') => {
@@ -502,15 +532,41 @@ export default function Book({ user }) {
                   <p className="font-black text-slate-800 mt-1">₹{price.base}</p>
                 </div>
               </div>
+
+              {/* Coupon Section */}
+              <div className="bg-slate-50 p-4 rounded-3xl border border-slate-100 flex items-center gap-3 relative mb-2">
+                <input 
+                  type="text" 
+                  value={couponCode} 
+                  onChange={(e) => { setCouponCode(e.target.value.toUpperCase()); setCouponError(''); }}
+                  disabled={couponApplied}
+                  placeholder="Enter Coupon Code" 
+                  className="w-full bg-white border border-slate-200 rounded-2xl py-3 px-4 text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 uppercase disabled:bg-slate-100 disabled:text-slate-500" 
+                />
+                <button 
+                  onClick={couponApplied ? () => { setCouponApplied(false); setCouponCode(''); setDiscount(0); setPrice(p => ({...p, total: p.originalTotal})); } : applyCoupon}
+                  className={`px-5 py-3 rounded-2xl font-bold text-sm transition-colors whitespace-nowrap ${couponApplied ? 'bg-red-50 text-red-600 hover:bg-red-100' : 'bg-slate-800 text-white hover:bg-slate-900'}`}
+                >
+                  {couponApplied ? 'Remove' : 'Apply'}
+                </button>
+                {couponError && <p className="absolute -bottom-4 left-4 text-[10px] font-bold text-red-500">{couponError}</p>}
+                {couponApplied && <p className="absolute -bottom-4 left-4 text-[10px] font-bold text-emerald-500">20% Off Applied! Saved ₹{discount}</p>}
+              </div>
             </div>
 
-            <div className="bg-slate-900 rounded-3xl p-6 shadow-2xl relative overflow-hidden">
+            <div className="bg-slate-900 rounded-3xl p-6 shadow-2xl relative overflow-hidden mt-6">
               <div className="absolute -top-10 -right-10 w-40 h-40 bg-blue-500/20 rounded-full blur-3xl" />
               <div className="flex items-end justify-between relative z-10">
                 <div>
                   <p className="text-slate-400 text-xs font-bold uppercase mb-1">Total Estimate</p>
                   <p className="text-white text-4xl font-black">₹{price.total}</p>
-                  <p className="text-slate-500 text-xs mt-1 font-medium">Base ₹{price.base} + {price.distance}km × ₹{PER_KM_RATE}</p>
+                  <p className="text-slate-400 text-[10px] mt-1 font-bold whitespace-nowrap">
+                    {couponApplied ? (
+                      <span className="text-emerald-400 font-black">₹{discount} Discount Applied! (Original: ₹{price.originalTotal})</span>
+                    ) : (
+                      `Base ₹${price.base} + ${price.distance}km × ₹${price.rate || PER_KM_RATE}`
+                    )}
+                  </p>
                 </div>
                 <button
                   onClick={handlePayment}

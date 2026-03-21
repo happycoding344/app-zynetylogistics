@@ -125,6 +125,13 @@ function zynety_register_routes() {
         'callback' => 'zynety_api_driver_requests',
         'permission_callback' => '__return_true'
     ]);
+
+    // Profile Settings
+    register_rest_route('zynety/v1', '/profile', [
+        'methods'  => 'POST',
+        'callback' => 'zynety_api_update_profile',
+        'permission_callback' => '__return_true'
+    ]);
 }
 
 // ==============================================
@@ -174,6 +181,8 @@ function zynety_api_auth(WP_REST_Request $request) {
         'email'        => $email,
         'display_name' => get_user_meta($user->ID, 'zynety_display_name', true) ?: explode('@', $email)[0],
         'phone'        => get_user_meta($user->ID, 'zynety_phone', true) ?: '',
+        'company'      => get_user_meta($user->ID, 'zynety_company', true) ?: '',
+        'address'      => get_user_meta($user->ID, 'zynety_address', true) ?: '',
         'role'         => $role,
         'auth_token'   => $token,
         'message'      => 'Authenticated successfully'
@@ -412,3 +421,45 @@ function zynety_api_driver_requests(WP_REST_Request $request) {
 
     return rest_ensure_response(['status' => 'success', 'requests' => $requests]);
 }
+
+// ==============================================
+// 11. UPDATE PROFILE
+// ==============================================
+function zynety_api_update_profile(WP_REST_Request $request) {
+    $params = $request->get_json_params() ?: [];
+    $user_id = intval($params['user_id'] ?? 0);
+    $email = sanitize_email($params['user_email'] ?? '');
+    
+    // Resolve real user_id from email if mock fallback (0 or 1) was sent
+    if (($user_id <= 1) && !empty($email)) {
+        $wp_user = get_user_by('email', $email);
+        if ($wp_user) $user_id = $wp_user->ID;
+    }
+
+    if ($user_id <= 0) {
+        return new WP_Error('invalid_user', 'Invalid user.', ['status' => 400]);
+    }
+
+    if (isset($params['display_name'])) {
+        update_user_meta($user_id, 'zynety_display_name', sanitize_text_field($params['display_name']));
+    }
+    if (isset($params['phone'])) {
+        update_user_meta($user_id, 'zynety_phone', sanitize_text_field($params['phone']));
+    }
+    if (isset($params['company'])) {
+        update_user_meta($user_id, 'zynety_company', sanitize_text_field($params['company']));
+    }
+    if (isset($params['address'])) {
+        update_user_meta($user_id, 'zynety_address', sanitize_textarea_field($params['address']));
+    }
+
+    return rest_ensure_response([
+        'status'       => 'success',
+        'message'      => 'Profile updated successfully',
+        'display_name' => get_user_meta($user_id, 'zynety_display_name', true),
+        'phone'        => get_user_meta($user_id, 'zynety_phone', true),
+        'company'      => get_user_meta($user_id, 'zynety_company', true),
+        'address'      => get_user_meta($user_id, 'zynety_address', true),
+    ]);
+}
+
