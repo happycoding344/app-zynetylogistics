@@ -64,7 +64,7 @@ jobs:
           username: u442506605
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
           script: |
-            mkdir -p domains/zynetylogistics.com/public_html/wp-content/plugins/zynety-app-plugin
+            mkdir -p domains/zynetylogistics.com/public_html/wp-content/plugins/zynety-logistics-core
 
       - name: Deploy Backend Plugin (into plugin folder)
         uses: appleboy/scp-action@v0.1.7
@@ -74,9 +74,9 @@ jobs:
           username: u442506605
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
           source: "zynety-app-plugin.php"
-          target: "domains/zynetylogistics.com/public_html/wp-content/plugins/zynety-app-plugin/"
+          target: "domains/zynetylogistics.com/public_html/wp-content/plugins/zynety-logistics-core/"
 
-      - name: Activate Plugin & Clear Cache via WP-CLI
+      - name: Rename and Activate Plugin via WP-CLI
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: 145.79.211.27
@@ -85,13 +85,16 @@ jobs:
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
           script: |
             cd domains/zynetylogistics.com/public_html
+            # Rename the file to accurately match the core plugin so WP loads the update
+            mv wp-content/plugins/zynety-logistics-core/zynety-app-plugin.php wp-content/plugins/zynety-logistics-core/zynety-logistics-core.php || true
+            
             # Activate plugin if WP-CLI is available
             if command -v wp &> /dev/null; then
-              wp plugin activate zynety-app-plugin --allow-root || true
+              wp plugin activate zynety-logistics-core --allow-root || true
               wp rewrite flush --allow-root || true
               wp cache flush --allow-root || true
               wp litespeed-purge all --allow-root || true
             fi
             # Fallback file cache clearing
             rm -rf wp-content/cache/* || true
-            echo "Plugin deployed successfully to: wp-content/plugins/zynety-app-plugin/"
+            echo "Plugin deployed and renamed successfully to: zynety-logistics-core.php"

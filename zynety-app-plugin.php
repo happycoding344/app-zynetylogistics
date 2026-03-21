@@ -39,6 +39,36 @@ function zynety_app_settings_page() {
 }
 
 // ==============================================
+// 1.5 ADMIN META BOX (Order Status)
+// ==============================================
+add_action('add_meta_boxes', function() {
+    add_meta_box('zynety_order_status', 'Update Order Status', 'zynety_order_status_html', 'zynety_booking', 'side', 'high');
+});
+
+function zynety_order_status_html($post) {
+    $current_status = get_post_meta($post->ID, 'status', true) ?: 'pending';
+    // User requested options: pending, confirmed, on process, completed, closed
+    $statuses = ['pending', 'confirmed', 'on_process', 'driver_assigned', 'in_transit', 'completed', 'closed'];
+    wp_nonce_field('zynety_save_status', 'zynety_status_nonce');
+    echo '<select name="zynety_status" style="width:100%">';
+    foreach ($statuses as $status) {
+        $selected = ($status === $current_status) ? 'selected' : '';
+        echo '<option value="' . esc_attr($status) . '" ' . $selected . '>' . esc_html(ucwords(str_replace('_', ' ', $status))) . '</option>';
+    }
+    echo '</select>';
+}
+
+add_action('save_post', function($post_id) {
+    if (!isset($_POST['zynety_status_nonce']) || !wp_verify_nonce($_POST['zynety_status_nonce'], 'zynety_save_status')) return;
+    if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
+    if (!current_user_can('edit_post', $post_id)) return;
+    
+    if (isset($_POST['zynety_status'])) {
+        update_post_meta($post_id, 'status', sanitize_text_field($_POST['zynety_status']));
+    }
+});
+
+// ==============================================
 // 2. CUSTOM POST TYPES
 // ==============================================
 add_action('init', 'zynety_register_cpts');
